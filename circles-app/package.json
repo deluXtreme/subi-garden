@@ -49,6 +49,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@tanstack/svelte-query": "^5.80.6",
     "@zxing/library": "^0.21.3",
     "buffer": "^6.0.3",
     "chart.js": "^4.4.8",

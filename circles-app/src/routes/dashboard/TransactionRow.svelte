@@ -17,7 +17,6 @@
   let counterpartyAddress = $state('');
   let badgeUrl: string | null = $state(null);
 
-
   function parseEventDetails(eventsJson: string) {
     let parsed: any[];
     try {
@@ -56,15 +55,19 @@
   }
 
   function getCounterpartyAddress(avatarAddress: string) {
-    if (item.from === '0x0000000000000000000000000000000000000000') return item.to.toLowerCase();
-    if (item.to === '0x0000000000000000000000000000000000000000') return avatarAddress.toLowerCase();
+    if (item.from === '0x0000000000000000000000000000000000000000')
+      return item.to.toLowerCase();
+    if (item.to === '0x0000000000000000000000000000000000000000')
+      return avatarAddress.toLowerCase();
     if (item.from.toLowerCase() === avatarAddress) return item.to.toLowerCase();
     return item.from.toLowerCase();
   }
 
   function getBadge(avatarAddress: string) {
-    if (item.from === '0x0000000000000000000000000000000000000000') return '/badge-mint.svg';
-    if (item.to === '0x0000000000000000000000000000000000000000') return '/badge-burn.svg';
+    if (item.from === '0x0000000000000000000000000000000000000000')
+      return '/badge-mint.svg';
+    if (item.to === '0x0000000000000000000000000000000000000000')
+      return '/badge-burn.svg';
     if (item.from.toLowerCase() === avatarAddress) return '/badge-sent.svg';
     if (item.to.toLowerCase() === avatarAddress) return '/badge-received.svg';
     return null;
@@ -76,7 +79,9 @@
       tags = result.tags.join(', ');
       netCircles = item.circles;
 
-      counterpartyAddress = getCounterpartyAddress(avatarState.avatar.address).toLowerCase();
+      counterpartyAddress = getCounterpartyAddress(
+        avatarState.avatar.address
+      ).toLowerCase();
       badgeUrl = getBadge(avatarState.avatar.address);
     }
   });
@@ -90,9 +95,9 @@
   {#if avatarState.avatar}
     <div>
       <Avatar
-        address={counterpartyAddress}
+        address={counterpartyAddress as `0x${string}`}
         view="horizontal"
-        pictureOverlayUrl={badgeUrl}
+        pictureOverlayUrl={badgeUrl ?? undefined}
         topInfo={tags}
         bottomInfo={getTimeAgo(item.timestamp)}
       />
@@ -100,16 +105,16 @@
     <div class="col text-right">
       {#if item.from.toLowerCase() === avatarState.avatar.address.toLowerCase()}
         <span class="text-red-500 font-bold">
-          {#if netCircles.toFixed(2) === "0.00"}
-                    &lt; 0.01
+          {#if netCircles.toFixed(2) === '0.00'}
+            &lt; 0.01
           {:else}
-                    -{netCircles.toFixed(2)}
+            -{netCircles.toFixed(2)}
           {/if}
-                </span> CRC
+        </span> CRC
       {:else}
-                <span class="text-green-700 font-bold">
-                    +{netCircles.toFixed(2)}
-                </span> CRC
+        <span class="text-green-700 font-bold">
+          +{netCircles.toFixed(2)}
+        </span> CRC
       {/if}
       <p class="text-xs text-gray-500">
         <!-- Additional info ... -->
