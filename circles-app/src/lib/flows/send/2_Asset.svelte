@@ -3,6 +3,7 @@
   import type { SendFlowContext } from '$lib/flows/send/context';
   import SelectAsset from '$lib/pages/SelectAsset.svelte';
   import SelectAmount from './3_Amount.svelte';
+  import SubscriptionAmount from '$lib/flows/subscribe/SubscriptionAmount.svelte';
   import { onMount } from 'svelte';
   import FlowDecoration from '$lib/flows/FlowDecoration.svelte';
   import { circlesBalances } from '$lib/stores/circlesBalances';
@@ -24,13 +25,31 @@
   function onselect(tokenBalanceRow: TokenBalanceRow) {
     context.selectedAsset = tokenBalanceRow;
 
-    popupControls.open({
-      title: 'Enter Amount',
-      component: SelectAmount,
-      props: {
-        context: context,
-      },
-    });
+    // Check if this is a subscription flow
+    if (context.isSubscription) {
+      popupControls.open({
+        title: 'Subscription Amount & Frequency',
+        component: SubscriptionAmount,
+        props: {
+          context: {
+            selectedAddress: context.selectedAddress,
+            selectedAsset: tokenBalanceRow,
+            amount: undefined,
+            frequency: 'daily',
+            frequencySeconds: 86400,
+          },
+        },
+      });
+    } else {
+      // Normal send flow
+      popupControls.open({
+        title: 'Enter Amount',
+        component: SelectAmount,
+        props: {
+          context: context,
+        },
+      });
+    }
   }
 </script>
 
