@@ -1,22 +1,36 @@
 <script lang="ts">
   import GenericList from '$lib/components/GenericList.svelte';
   import TransactionRow from './TransactionRow.svelte';
+  import SubscriptionRow from './SubscriptionRow.svelte';
+  import SubscriberRow from './SubscriberRow.svelte';
   import TotalBalance from '$lib/components/TotalBalance.svelte';
   import { avatarState } from '$lib/stores/avatar.svelte';
   import { roundToDecimals } from '$lib/utils/shared';
   import { runTask } from '$lib/utils/tasks';
   import { transactionHistory } from '$lib/stores/transactionHistory';
   import { groupMetrics } from '$lib/stores/groupMetrics.svelte';
+  import {
+    getSubscriptionsForAddress,
+    getSubscribersForAddress,
+  } from '$lib/stores/subscriptions';
   import ModernHistoryChart from '$lib/components/ModernHistoryChart.svelte';
   import ModernPieChart from '$lib/components/ModernPieChart.svelte';
   import GroupMetricsStats from '$lib/components/GroupMetricsStats.svelte';
 
   let mintableAmount: number = $state(0);
+  let subscriptionsStore = $state(getSubscriptionsForAddress(''));
+  let subscribersStore = $state(getSubscribersForAddress(''));
 
   $effect(() => {
     (async () => {
       if (avatarState.avatar && !avatarState.isGroup) {
         mintableAmount = (await avatarState.avatar.getMintableAmount()) ?? 0;
+
+        // Update subscription stores when avatar changes
+        subscriptionsStore = getSubscriptionsForAddress(
+          avatarState.avatar.address
+        );
+        subscribersStore = getSubscribersForAddress(avatarState.avatar.address);
       }
     })();
   });
@@ -53,7 +67,7 @@
         value="overview"
         role="tab"
         class="tab h-auto"
-        defaultChecked="true"
+        defaultChecked
         aria-label="Overview"
       />
       <div role="tabpanel" class="tab-content mt-8 bg-base-100 border-none">
@@ -153,6 +167,45 @@
         {/if}
       </div>
     {/if}
+
+    <input
+      type="radio"
+      name="tabs"
+      value="subscriptions"
+      role="tab"
+      class="tab h-auto"
+      aria-label="Subscriptions"
+    />
+    <div role="tabpanel" class="tab-content mt-8 bg-base-100 border-none">
+      <div class="w-full md:border rounded-lg md:px-4">
+        <div class="w-full mb-4">
+          <h3 class="text-lg font-semibold text-gray-800">My Subscriptions</h3>
+          <p class="text-sm text-gray-600">Recurring payments you've set up</p>
+        </div>
+        <GenericList row={SubscriptionRow} store={subscriptionsStore} />
+      </div>
+    </div>
+
+    <input
+      type="radio"
+      name="tabs"
+      value="subscribers"
+      role="tab"
+      class="tab h-auto"
+      aria-label="Subscribers"
+    />
+    <div role="tabpanel" class="tab-content mt-8 bg-base-100 border-none">
+      <div class="w-full md:border rounded-lg md:px-4">
+        <div class="w-full mb-4">
+          <h3 class="text-lg font-semibold text-gray-800">My Subscribers</h3>
+          <p class="text-sm text-gray-600">
+            People subscribed to receive your tokens
+          </p>
+        </div>
+        <GenericList row={SubscriberRow} store={subscribersStore} />
+      </div>
+    </div>
+
     <input
       type="radio"
       name="tabs"

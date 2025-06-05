@@ -12,6 +12,7 @@
   import Untrust from '$lib/pages/Untrust.svelte';
   import Trust from '$lib/pages/Trust.svelte';
   import SelectAsset from '$lib/flows/send/2_Asset.svelte';
+  import SubscriptionAmount from '$lib/flows/subscribe/SubscriptionAmount.svelte';
   import { getProfile } from '$lib/utils/profile';
   import { formatTrustRelation, getTypeString } from '$lib/utils/helpers';
   import Avatar from '$lib/components/avatar/Avatar.svelte';
@@ -175,7 +176,7 @@
   <div class="w-[80%] sm:w-[60%] border-b border-[#E5E7EB]"></div>
 
   <!-- Updated Button Layout: Flex Row for Horizontal Alignment -->
-  <div class="w-full flex justify-center mt-6 space-x-6">
+  <div class="w-full flex justify-center mt-6 space-x-4">
     <button
       class="btn btn-primary text-white"
       onclick={() => {
@@ -192,6 +193,25 @@
     >
       <img src="/send-new.svg" alt="Send" class="w-5 h-5" />
       Send
+    </button>
+
+    <button
+      class="btn btn-secondary"
+      onclick={() => {
+        popupControls.open({
+          title: 'Create Subscription',
+          component: SelectAsset,
+          props: {
+            context: {
+              selectedAddress: otherAvatar?.avatar,
+              isSubscription: true,
+            },
+          },
+        });
+      }}
+    >
+      <img src="/clock.svg" alt="Subscribe" class="w-5 h-5" />
+      Subscribe
     </button>
     {#if otherAvatar?.type === 'CrcV2_RegisterGroup' && !!mintHandler}
       <button

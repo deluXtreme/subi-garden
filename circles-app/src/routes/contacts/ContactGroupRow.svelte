@@ -27,7 +27,7 @@
     }}
   >
     <Avatar
-      {address}
+      address={address as `0x${string}`}
       view="horizontal"
       bottomInfo={trustRelation}
       clickable={false}

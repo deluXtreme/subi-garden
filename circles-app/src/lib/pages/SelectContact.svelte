@@ -1,6 +1,5 @@
 <script lang="ts" module>
   import type { Profile } from '@circles-sdk/profiles';
-  import type { Address } from '@circles-sdk/utils';
 
   export type SelectedEvent = {
     address: Address;
@@ -14,16 +13,16 @@
   import AddressInput from '$lib/components/AddressInput.svelte';
   import Avatar from '$lib/components/avatar/Avatar.svelte';
   import { shortenAddress } from '$lib/utils/shared';
-
+  import Address from '$lib/components/Address.svelte';
 
   interface Props {
-    store?: 
-    | Readable<{
-        data: ContactList;
-        next: () => Promise<boolean>;
-        ended: boolean;
-      }>
-    | undefined;
+    store?:
+      | Readable<{
+          data: ContactList;
+          next: () => Promise<boolean>;
+          ended: boolean;
+        }>
+      | undefined;
     selectedAddress?: Address;
     addressListTitle?: string;
     noResultsMessage?: string;
@@ -37,23 +36,25 @@
     addressListTitle = 'Recent',
     noResultsMessage = 'No recent addresses found',
     group = false,
-    onselect
+    onselect,
   }: Props = $props();
 
   let data = $derived($store?.data ?? {});
-  let filteredAddresses = $derived((() => {
-    if (selectedAddress) {
-      return Object.keys(data).filter(
-        (address) =>
-          address.toLowerCase().includes(selectedAddress.toLowerCase()) ||
-          data[address]?.contactProfile?.name
-            ?.toLowerCase()
-            ?.includes(selectedAddress.toLowerCase())
-      );
-    } else {
-      return Object.keys(data);
-    }
-  })());
+  let filteredAddresses = $derived(
+    (() => {
+      if (selectedAddress) {
+        return Object.keys(data).filter(
+          (address) =>
+            address.toLowerCase().includes(selectedAddress.toLowerCase()) ||
+            data[address]?.contactProfile?.name
+              ?.toLowerCase()
+              ?.includes(selectedAddress.toLowerCase())
+        );
+      } else {
+        return Object.keys(data);
+      }
+    })()
+  );
 
   function handleSelect(address: Address) {
     const profile = $store?.data[address]?.contactProfile;
