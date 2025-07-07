@@ -9,7 +9,7 @@
   import { avatarState } from '$lib/stores/avatar.svelte';
   import { popupControls } from '$lib/stores/popUp';
   import Avatar from '$lib/components/avatar/Avatar.svelte';
-  import { createSubscriptionFlow } from '$lib/utils/subscriptionUtils';
+  import { createSubscriptionFlowBatched } from '$lib/utils/subscriptionUtils';
 
   interface Props {
     context: SubscriptionFlowContext;
@@ -37,7 +37,7 @@
       throw new Error('No category specified');
     }
 
-    const subscriptionPromise = createSubscriptionFlow({
+    const subscriptionPromise = createSubscriptionFlowBatched({
       subscriber: avatarState.avatar.address,
       recipient: context.selectedAddress,
       amount: context.amount,

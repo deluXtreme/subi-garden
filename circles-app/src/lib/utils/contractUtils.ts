@@ -151,7 +151,7 @@ const HUB_ABI = [
 /**
  * Get signer and provider from Circles SDK
  */
-function getCirclesConnection(): {
+export function getCirclesConnection(): {
   signer: ethers.Signer;
   provider: ethers.Provider;
   address: string;
