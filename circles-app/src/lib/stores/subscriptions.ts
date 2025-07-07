@@ -4,14 +4,16 @@ import type {
   SubscriptionData,
   ProcessedSubscription,
 } from '$lib/types/subscriptions';
+import { SubscriptionCategory } from '$lib/types/subscriptions';
+import { formatCategory } from '$lib/utils/contractUtils';
 
 // Mock CSV data - in production this would come from your database
-const CSV_DATA = `contract_address,sub_id,module,subscriber,recipient,amount,frequency,tx_hash,block_number,block_hash,network
-0x7e9baf7cc7cd83bacefb9b2d5c5124c0f9c30834,1,0x39c90767e9fe8f10c3a83b003657ebba7068bbab,0x6b69683c8897e3d18e74b1ba117b49f80423da5d,0xede0c2e70e8e2d54609c1bdf79595506b6f623fe,1000000000000,3600,0x980128d31f18fa103f2ccdaaca3b593c00212c85d14ced222e2ff6da302cb6d5,40355251,0x1e15a44b9b4dfd676eb06d6839519057ebdd8a0d28107de5936dbd7edd36580b,gnosis
-0x7e9baf7cc7cd83bacefb9b2d5c5124c0f9c30834,2,0x39c90767e9fe8f10c3a83b003657ebba7068bbab,0x6b69683c8897e3d18e74b1ba117b49f80423da5d,0xede0c2e70e8e2d54609c1bdf79595506b6f623fe,1000000000000,3600,0xfabf9fb993f6a7f2da4ff480044abdebc031ed29319c59374314cf1bbe5596f0,40356998,0x7c84a2f4175499e6a9b31c61a67735ce5ad72fef0d6222c3de12d51f82df706f,gnosis
-0x7e9baf7cc7cd83bacefb9b2d5c5124c0f9c30834,3,0x39c90767e9fe8f10c3a83b003657ebba7068bbab,0x6b69683c8897e3d18e74b1ba117b49f80423da5d,0xede0c2e70e8e2d54609c1bdf79595506b6f623fe,1000000000000,3600,0x7161e4228c18fd6432ba37cb0959663b81d53bc905197770965abcbad9068a8d,40357229,0xcd68113867a16cc1348eb415e0fd2df54227f8ec0b0234a5f17665dda8922a07,gnosis
-0x7e9baf7cc7cd83bacefb9b2d5c5124c0f9c30834,0,0xeb522ba17a582b8df500bf107d13b1099eaa091c,0xcf6dc192dc292d5f2789da2db02d6dd4f41f4214,0xede0c2e70e8e2d54609c1bdf79595506b6f623fe,1000000000000,3600,0x639627a76cbaf2ac8f44ad44ed596bc77ee42f85f85d45b1e0b7e4525870e1d9,40357460,0x846ebb004a7d4993f868a0c7d8c0ec1718143cdf4c146a1bde78a87ab6e9be9c,gnosis
-0x7e9baf7cc7cd83bacefb9b2d5c5124c0f9c30834,4,0x39c90767e9fe8f10c3a83b003657ebba7068bbab,0xede0c2e70e8e2d54609c1bdf79595506b6f623fe,0xcf6dc192dc292d5f2789da2db02d6dd4f41f4214,1000000000000,3600,0x639627a76cbaf2ac8f44ad44ed596bc77ee42f85f85d45b1e0b7e4525870e1d9,40357460,0x846ebb004a7d4993f868a0c7d8c0ec1718143cdf4c146a1bde78a87ab6e9be9c,gnosis`;
+const CSV_DATA = `contract_address,sub_id,module,subscriber,recipient,amount,frequency,category,tx_hash,block_number,block_hash,network
+0x7e9baf7cc7cd83bacefb9b2d5c5124c0f9c30834,1,0x39c90767e9fe8f10c3a83b003657ebba7068bbab,0x6b69683c8897e3d18e74b1ba117b49f80423da5d,0xede0c2e70e8e2d54609c1bdf79595506b6f623fe,1000000000000,3600,1,0x980128d31f18fa103f2ccdaaca3b593c00212c85d14ced222e2ff6da302cb6d5,40355251,0x1e15a44b9b4dfd676eb06d6839519057ebdd8a0d28107de5936dbd7edd36580b,gnosis
+0x7e9baf7cc7cd83bacefb9b2d5c5124c0f9c30834,2,0x39c90767e9fe8f10c3a83b003657ebba7068bbab,0x6b69683c8897e3d18e74b1ba117b49f80423da5d,0xede0c2e70e8e2d54609c1bdf79595506b6f623fe,1000000000000,3600,0,0xfabf9fb993f6a7f2da4ff480044abdebc031ed29319c59374314cf1bbe5596f0,40356998,0x7c84a2f4175499e6a9b31c61a67735ce5ad72fef0d6222c3de12d51f82df706f,gnosis
+0x7e9baf7cc7cd83bacefb9b2d5c5124c0f9c30834,3,0x39c90767e9fe8f10c3a83b003657ebba7068bbab,0x6b69683c8897e3d18e74b1ba117b49f80423da5d,0xede0c2e70e8e2d54609c1bdf79595506b6f623fe,1000000000000,3600,2,0x7161e4228c18fd6432ba37cb0959663b81d53bc905197770965abcbad9068a8d,40357229,0xcd68113867a16cc1348eb415e0fd2df54227f8ec0b0234a5f17665dda8922a07,gnosis
+0x7e9baf7cc7cd83bacefb9b2d5c5124c0f9c30834,0,0xeb522ba17a582b8df500bf107d13b1099eaa091c,0xcf6dc192dc292d5f2789da2db02d6dd4f41f4214,0xede0c2e70e8e2d54609c1bdf79595506b6f623fe,1000000000000,3600,1,0x639627a76cbaf2ac8f44ad44ed596bc77ee42f85f85d45b1e0b7e4525870e1d9,40357460,0x846ebb004a7d4993f868a0c7d8c0ec1718143cdf4c146a1bde78a87ab6e9be9c,gnosis
+0x7e9baf7cc7cd83bacefb9b2d5c5124c0f9c30834,4,0x39c90767e9fe8f10c3a83b003657ebba7068bbab,0xede0c2e70e8e2d54609c1bdf79595506b6f623fe,0xcf6dc192dc292d5f2789da2db02d6dd4f41f4214,1000000000000,3600,0,0x639627a76cbaf2ac8f44ad44ed596bc77ee42f85f85d45b1e0b7e4525870e1d9,40357460,0x846ebb004a7d4993f868a0c7d8c0ec1718143cdf4c146a1bde78a87ab6e9be9c,gnosis`;
 
 let allSubscriptions: ProcessedSubscription[] = [];
 
@@ -34,6 +36,7 @@ function processSubscription(sub: SubscriptionData): ProcessedSubscription {
     ...sub,
     formattedAmount: formatAmount(sub.amount),
     formattedFrequency: formatFrequency(sub.frequency),
+    formattedCategory: formatCategory(sub.category),
     blockNumber: sub.block_number,
     transactionIndex: 0,
     logIndex: 0,
@@ -46,7 +49,7 @@ Papa.parse(CSV_DATA, {
   skipEmptyLines: true,
   transform: (value: string, header: string) => {
     // Convert numeric fields
-    if (['frequency', 'block_number'].includes(header)) {
+    if (['frequency', 'block_number', 'category'].includes(header)) {
       return parseInt(value, 10);
     }
     return value;
