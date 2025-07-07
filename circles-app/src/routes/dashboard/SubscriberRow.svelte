@@ -1,6 +1,7 @@
 <script lang="ts">
   import Avatar from '$lib/components/avatar/Avatar.svelte';
   import type { ProcessedSubscription } from '$lib/types/subscriptions';
+  import { SubscriptionCategory } from '$lib/types/subscriptions';
 
   interface Props {
     item: ProcessedSubscription;
@@ -14,6 +15,19 @@
 
   function shortenTxHash(hash: string): string {
     return `${hash.slice(0, 10)}...${hash.slice(-8)}`;
+  }
+
+  function getCategoryColor(category: SubscriptionCategory): string {
+    switch (category) {
+      case SubscriptionCategory.TRUSTED:
+        return 'bg-blue-100 text-blue-800';
+      case SubscriptionCategory.GROUP:
+        return 'bg-purple-100 text-purple-800';
+      case SubscriptionCategory.UNTRUSTED:
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   }
 </script>
 
@@ -39,6 +53,12 @@
       </span>
       <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
         Every {item.formattedFrequency}
+      </span>
+    </div>
+
+    <div class="flex items-center gap-2 mb-1">
+      <span class="text-xs {getCategoryColor(item.category)} px-2 py-1 rounded">
+        {item.formattedCategory}
       </span>
     </div>
 
