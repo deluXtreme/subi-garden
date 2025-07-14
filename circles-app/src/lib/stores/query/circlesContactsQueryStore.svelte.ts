@@ -116,8 +116,9 @@ async function enrichContactData(
   await Promise.all(promises);
 
   const avatarInfos =
-    (await get(circles)?.data.getAvatarInfoBatch(Object.keys(profileRecord) as Address[])) ??
-    [];
+    (await get(circles)?.data.getAvatarInfoBatch(
+      Object.keys(profileRecord) as Address[]
+    )) ?? [];
   const avatarInfoRecord: Record<string, AvatarRow> = {};
   avatarInfos.forEach((info) => {
     avatarInfoRecord[info.avatar] = info;

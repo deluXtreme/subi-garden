@@ -18,7 +18,9 @@
   }
 </script>
 
-<div class="w-full flex flex-col min-h-screen max-w-xl mt-28 gap-y-4 justify-center">
+<div
+  class="w-full flex flex-col min-h-screen max-w-xl mt-28 gap-y-4 justify-center"
+>
   <Disclaimer />
   <div class="card bg-base-100 w-96 border shadow-sm">
     <figure class="px-10 pt-10">

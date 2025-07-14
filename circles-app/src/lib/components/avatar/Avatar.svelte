@@ -4,7 +4,9 @@
   export type CirclesSafeMap = { [safeAddress: string]: Profile };
   export const CirclesGardenApi = `https://api.circles.garden/`;
 
-  async function queryCirclesGarden(safeAddresses: string[]): Promise<CirclesSafeMap> {
+  async function queryCirclesGarden(
+    safeAddresses: string[]
+  ): Promise<CirclesSafeMap> {
     const safeAddressCopy = JSON.parse(JSON.stringify(safeAddresses));
     const batches: string[][] = [];
 
@@ -21,7 +23,7 @@
     for (const batch of batches) {
       const query = batch.reduce(
         (p, c) => p + `address[]=${ethers.getAddress(c)}&`,
-        '',
+        ''
       );
       const requestUrl = `${CirclesGardenApi}api/users/?${query}`;
 
@@ -82,7 +84,10 @@
   import { getProfile } from '$lib/utils/profile';
   import HorizontalAvatarLayout from './HorizontalAvatarLayout.svelte';
   import VerticalAvatarLayout from './VerticalAvatarLayout.svelte';
-  import { popupControls, type PopupContentDefinition } from '$lib/stores/popUp';
+  import {
+    popupControls,
+    type PopupContentDefinition,
+  } from '$lib/stores/popUp';
   import type { Address } from '@circles-sdk/utils';
   import type { Profile } from '@circles-sdk/profiles';
   import { shortenAddress } from '$lib/utils/shared';
@@ -200,9 +205,6 @@
   </div>
 {:else}
   <div transition:fade>
-    <VerticalAvatarLayout
-      onclick={openAvatar}
-      {profile}
-    />
+    <VerticalAvatarLayout onclick={openAvatar} {profile} />
   </div>
 {/if}

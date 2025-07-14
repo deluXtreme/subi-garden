@@ -3,7 +3,8 @@ import { goto } from '$app/navigation';
 import { avatarState } from '$lib/stores/avatar.svelte';
 import { circles } from '$lib/stores/circles';
 import {
-  BrowserProviderContractRunner, PrivateKeyContractRunner,
+  BrowserProviderContractRunner,
+  PrivateKeyContractRunner,
 } from '@circles-sdk/adapter-ethers';
 import {
   SafeSdkBrowserContractRunner,
@@ -24,7 +25,10 @@ export const wallet = writable<SdkContractRunner | undefined>();
 
 export const GNOSIS_CHAIN_ID_DEC = 100n;
 
-export async function initializeWallet(type: WalletType, avatarAddress?: Address): Promise<SdkContractRunner> {
+export async function initializeWallet(
+  type: WalletType,
+  avatarAddress?: Address
+): Promise<SdkContractRunner> {
   if (type === 'metamask') {
     const runner = new BrowserProviderContractRunner();
     await runner.init();
@@ -42,18 +46,27 @@ export async function initializeWallet(type: WalletType, avatarAddress?: Address
     if (!privateKey) {
       throw new Error('Private key not found in localStorage');
     }
-    const rpcProvider = new JsonRpcProvider(environment.ring ? gnosisConfig.rings.circlesRpcUrl : gnosisConfig.production.circlesRpcUrl);
+    const rpcProvider = new JsonRpcProvider(
+      environment.ring
+        ? gnosisConfig.rings.circlesRpcUrl
+        : gnosisConfig.production.circlesRpcUrl
+    );
     const runner = new PrivateKeyContractRunner(rpcProvider, privateKey);
     await runner.init();
     return runner;
-  } else if ((type === 'circles' || type === 'circles+group') && avatarAddress) {
+  } else if (
+    (type === 'circles' || type === 'circles+group') &&
+    avatarAddress
+  ) {
     const privateKey = CirclesStorage.getInstance().privateKey;
     if (!privateKey) {
       throw new Error('Private key not found in localStorage');
     }
     const runner = new SafeSdkPrivateKeyContractRunner(
       privateKey,
-      environment.ring ? gnosisConfig.rings.circlesRpcUrl : gnosisConfig.production.circlesRpcUrl,
+      environment.ring
+        ? gnosisConfig.rings.circlesRpcUrl
+        : gnosisConfig.production.circlesRpcUrl
     );
     await runner.init(avatarAddress);
     return runner as SdkContractRunner;
@@ -98,10 +111,7 @@ export async function restoreWallet() {
       avatarState.isGroup = false;
     }
 
-    const restoredWallet = await initializeWallet(
-      walletType,
-      savedAvatar,
-    );
+    const restoredWallet = await initializeWallet(walletType, savedAvatar);
 
     if (!restoredWallet || !restoredWallet.address) {
       console.log('Failed to restore wallet or wallet address is undefined');
@@ -114,7 +124,7 @@ export async function restoreWallet() {
     //TODO: cache environment on local storage
     const sdk = new Sdk(
       restoredWallet as SdkContractRunner,
-      await getCirclesConfig(100n, environment.ring),
+      await getCirclesConfig(100n, environment.ring)
     );
     circles.set(sdk);
 
@@ -122,11 +132,9 @@ export async function restoreWallet() {
       avatarState.groupType = await sdk.getGroupType(savedGroup);
     }
 
-    const avatarToRestore =
-      (savedGroup
-        ?? savedAvatar
-        ?? restoredWallet.address) as Address;
-
+    const avatarToRestore = (savedGroup ??
+      savedAvatar ??
+      restoredWallet.address) as Address;
 
     console.log('savedAvatar', savedAvatar);
     console.log('savedGroup', savedGroup);
@@ -158,7 +166,7 @@ export async function clearSession() {
     tokenHolderBalance: undefined,
     erc20Token: undefined,
     priceHistoryWeek: undefined,
-    priceHistoryMonth: undefined
+    priceHistoryMonth: undefined,
   });
   Object.assign(avatarState, {
     avatar: undefined,

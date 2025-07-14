@@ -39,7 +39,8 @@
   let isLoading = $state(false);
   let formData: BaseGroupProfile = $derived({
     service: '0x0000000000000000000000000000000000000000',
-    feeCollection: $wallet?.address || '0x0000000000000000000000000000000000000000',
+    feeCollection:
+      $wallet?.address || '0x0000000000000000000000000000000000000000',
     initialConditions: '',
   });
   let mintPolicy = $state(mintPolicies[0]);
@@ -110,7 +111,7 @@
     );
 
     avatarState.isGroup = true;
-    avatarState.groupType = "CrcV2_BaseGroupCreated";
+    avatarState.groupType = 'CrcV2_BaseGroupCreated';
 
     onstepchange('executed');
   }

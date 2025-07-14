@@ -16,7 +16,12 @@
     onselect?: (avatar: any) => void;
   }
 
-  let { selectedAddress = $bindable(undefined), searchType = 'send', oninvite, onselect }: Props = $props();
+  let {
+    selectedAddress = $bindable(undefined),
+    searchType = 'send',
+    oninvite,
+    onselect,
+  }: Props = $props();
   let lastAddress: string = $state('');
   let result: SearchResultProfile[] = $state([]);
   let profiles: Profiles | undefined = $state();
@@ -27,7 +32,10 @@
     if (!network) {
       throw new Error('Failed to get network');
     }
-    const circlesConfig = await getCirclesConfig(network.chainId, environment.ring);
+    const circlesConfig = await getCirclesConfig(
+      network.chainId,
+      environment.ring
+    );
     if (!circlesConfig.profileServiceUrl) {
       throw new Error('Profile service URL is not set');
     }
@@ -53,18 +61,23 @@
         name: selectedAddress!.toString(),
         CID: '',
         lastUpdatedAt: 0,
-        registeredName: null
+        registeredName: null,
       };
 
-      const nameResults = await profiles?.searchByName(selectedAddress!.toString());
+      const nameResults = await profiles?.searchByName(
+        selectedAddress!.toString()
+      );
       if (nameResults) results = [...nameResults];
-      const addressResult = await profiles?.searchByAddress(selectedAddress!.toString());
+      const addressResult = await profiles?.searchByAddress(
+        selectedAddress!.toString()
+      );
       if (addressResult) results = [...results, ...addressResult];
 
       // TODO: Properly type the profile. The returned values from above have an 'address' field.
       if (searchType === 'send') {
         const addressInResults = !!results.find(
-          (profile: any) => profile.address === selectedAddress!.toString().toLowerCase()
+          (profile: any) =>
+            profile.address === selectedAddress!.toString().toLowerCase()
         );
         if (!addressInResults && ethers.isAddress(selectedAddress)) {
           results.unshift(syntheticProfile);

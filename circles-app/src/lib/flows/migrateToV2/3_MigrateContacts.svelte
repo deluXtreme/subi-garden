@@ -31,32 +31,34 @@
     });
   }
 
-  let orderedContacts = $derived(Object.keys($contacts?.data ?? {}).sort((a, b) => {
-    /*
+  let orderedContacts = $derived(
+    Object.keys($contacts?.data ?? {}).sort((a, b) => {
+      /*
             // Alphabetical sorting by contact name
             const aRelation = $contacts?.data[a]?.contactProfile?.name;
             const bRelation = $contacts?.data[b]?.contactProfile?.name;
             return aRelation.localeCompare(bRelation);
          */
-    const aRelation = $contacts?.data[a].row.relation;
-    const bRelation = $contacts?.data[b].row.relation;
-    if (aRelation === 'mutuallyTrusts' && bRelation !== 'mutuallyTrusts') {
-      return -1;
-    }
-    if (aRelation === 'trusts' && bRelation === 'trustedBy') {
-      return -1;
-    }
-    if (aRelation === bRelation) {
+      const aRelation = $contacts?.data[a].row.relation;
+      const bRelation = $contacts?.data[b].row.relation;
+      if (aRelation === 'mutuallyTrusts' && bRelation !== 'mutuallyTrusts') {
+        return -1;
+      }
+      if (aRelation === 'trusts' && bRelation === 'trustedBy') {
+        return -1;
+      }
+      if (aRelation === bRelation) {
+        return 0;
+      }
+      if (bRelation === 'mutuallyTrusts' && aRelation !== 'mutuallyTrusts') {
+        return 1;
+      }
+      if (bRelation === 'trusts' && aRelation === 'trustedBy') {
+        return 1;
+      }
       return 0;
-    }
-    if (bRelation === 'mutuallyTrusts' && aRelation !== 'mutuallyTrusts') {
-      return 1;
-    }
-    if (bRelation === 'trusts' && aRelation === 'trustedBy') {
-      return 1;
-    }
-    return 0;
-  }));
+    })
+  );
 </script>
 
 <FlowDecoration>
@@ -110,7 +112,11 @@
               />
             {/if}
             {#if $contacts?.data[address]}
-              <span>{formatTrustRelation($contacts.data[address].row.relation)}</span>
+              <span
+                >{formatTrustRelation(
+                  $contacts.data[address].row.relation
+                )}</span
+              >
             {/if}
           </div>
         </Avatar>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatTrustRelation } from '$lib/utils/helpers';
-  import {formatUnits, parseEther} from 'ethers';
+  import { formatUnits, parseEther } from 'ethers';
   import Avatar from './avatar/Avatar.svelte';
   import type { Address } from '@circles-sdk/utils';
   import type { TrustRelation } from '@circles-sdk/data';

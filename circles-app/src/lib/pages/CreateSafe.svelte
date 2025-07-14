@@ -13,7 +13,7 @@
   let error: string | null = $state(null);
   let isWalletReady = $state(false);
 
-  let {onsafecreated} = $props();
+  let { onsafecreated } = $props();
 
   onMount(() => {
     isWalletReady = !!$wallet;

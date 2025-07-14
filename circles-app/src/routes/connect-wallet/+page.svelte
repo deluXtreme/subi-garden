@@ -25,7 +25,8 @@
         onchange={() => (environment.ring = !environment.ring)}
       />
       <a
-        href="https://docs.aboutcircles.com/developer-docs/getting-started-with-the-sdk#using-the-sandbox-version-of-circles-sdk-for-builders" target="_blank"
+        href="https://docs.aboutcircles.com/developer-docs/getting-started-with-the-sdk#using-the-sandbox-version-of-circles-sdk-for-builders"
+        target="_blank"
         class={`flex font-semibold items-center text-sm text-nowrap  transition-color duration-300 ease-in-out ${
           environment.ring
             ? 'text-orange-700'

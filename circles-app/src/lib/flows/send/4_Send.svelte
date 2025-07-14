@@ -5,7 +5,10 @@
   import { runTask } from '$lib/utils/tasks';
   import { roundToDecimals, shortenAddress } from '$lib/utils/shared';
   import { avatarState } from '$lib/stores/avatar.svelte';
-  import { tokenTypeToString, TransitiveTransferTokenAddress } from '$lib/pages/SelectAsset.svelte';
+  import {
+    tokenTypeToString,
+    TransitiveTransferTokenAddress,
+  } from '$lib/pages/SelectAsset.svelte';
   import { popupControls } from '$lib/stores/popUp';
   import { tcToCrc } from '@circles-sdk/utils';
   import { parseEther } from 'ethers';
@@ -45,31 +48,36 @@
         }
         // Convert to Uint8Array
         const pairs = hexString.match(/.{1,2}/g) ?? [];
-        dataUInt8Arr = new Uint8Array(
-          pairs.map((byte) => parseInt(byte, 16)),
-        );
+        dataUInt8Arr = new Uint8Array(pairs.map((byte) => parseInt(byte, 16)));
       } else {
         // Default to UTF-8
         dataUInt8Arr = new TextEncoder().encode(context.data);
       }
     }
 
-    let amountToSend: bigint = context.selectedAsset.version === 1
-      ? tcToCrc(new Date(), context.amount)
-      : parseEther(context.amount.toString());
+    let amountToSend: bigint =
+      context.selectedAsset.version === 1
+        ? tcToCrc(new Date(), context.amount)
+        : parseEther(context.amount.toString());
 
     runTask({
       name: `Send ${roundToDecimals(context.amount)} ${tokenTypeToString(context.selectedAsset.tokenType)} to ${shortenAddress(context.selectedAddress)}...`,
       promise:
         context.selectedAsset.tokenAddress === TransitiveTransferTokenAddress
-          ? avatarState.avatar.transfer(context.selectedAddress, context.amount, undefined, dataUInt8Arr, true)
+          ? avatarState.avatar.transfer(
+              context.selectedAddress,
+              context.amount,
+              undefined,
+              dataUInt8Arr,
+              true
+            )
           : avatarState.avatar.transfer(
-            context.selectedAddress,
-            amountToSend,
-            context.selectedAsset.tokenAddress,
-            dataUInt8Arr,
-            true
-          ),
+              context.selectedAddress,
+              amountToSend,
+              context.selectedAsset.tokenAddress,
+              dataUInt8Arr,
+              true
+            ),
     });
 
     popupControls.close();

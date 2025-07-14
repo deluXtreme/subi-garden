@@ -100,7 +100,7 @@
                 name="radio-7"
                 class="radio radio-success radio-sm"
                 checked={inviterSelected === inviter.avatar}
-                onclick={() => inviterSelected = inviter.avatar}
+                onclick={() => (inviterSelected = inviter.avatar)}
               /><Avatar
                 topInfo="Inviter"
                 clickable={false}

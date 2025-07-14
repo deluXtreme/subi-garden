@@ -26,10 +26,10 @@
   //
   async function setup(callNo: number = 0) {
     const walletType = CirclesStorage.getInstance().walletType;
-    if (walletType != "metamask") {
+    if (walletType != 'metamask') {
       CirclesStorage.getInstance().data = {
         avatar: undefined,
-        group: undefined
+        group: undefined,
       };
     }
 
@@ -55,18 +55,21 @@
       return;
     }
 
-    const circlesConfig = await getCirclesConfig(network.chainId, environment.ring);
+    const circlesConfig = await getCirclesConfig(
+      network.chainId,
+      environment.ring
+    );
 
     // Initialize the Circles SDK and set it as $circles to make it globally available.
     $circles = new Sdk($wallet! as SdkContractRunnerWrapper, circlesConfig);
     groupsByOwner = await getBaseAndCmgGroupsByOwnerBatch($circles, [
-       $wallet.address.toLowerCase() as Address,
-     ]);;
-     console.log(groupsByOwner);
+      $wallet.address.toLowerCase() as Address,
+    ]);
+    console.log(groupsByOwner);
     avatarInfo = await $circles.data.getAvatarInfo($wallet.address);
 
     CirclesStorage.getInstance().data = {
-      walletType: 'metamask'
+      walletType: 'metamask',
     };
   }
 
@@ -80,7 +83,7 @@
   class="w-full flex flex-col items-center min-h-screen max-w-xl gap-y-4 mt-20"
 >
   <div class="w-full">
-    <button onclick="{() => history.back()}">
+    <button onclick={() => history.back()}>
       <img src="/arrow-left.svg" alt="Arrow Left" class="w-4 h-4" />
     </button>
   </div>

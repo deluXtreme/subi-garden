@@ -1,4 +1,4 @@
-import type { CirclesRpc } from "@circles-sdk/data";
+import type { CirclesRpc } from '@circles-sdk/data';
 
 export async function getVaultAddress(
   circlesRpc: CirclesRpc,

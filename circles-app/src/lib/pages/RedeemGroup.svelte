@@ -10,7 +10,7 @@
   import type { TokenBalanceRow, TrustRelation } from '@circles-sdk/data';
   import { contacts } from '$lib/stores/contacts';
   import {
-  getGroupCollateral,
+    getGroupCollateral,
     getTreasuryAddress,
     getVaultAddress,
   } from '$lib/utils/vault';
@@ -104,7 +104,7 @@
 
   async function load() {
     if (!$circles) return;
-    
+
     const vaultAddress = await getVaultAddress(
       $circles.circlesRpc,
       asset.tokenOwner

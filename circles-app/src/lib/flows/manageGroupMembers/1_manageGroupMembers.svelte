@@ -182,7 +182,9 @@
     </label>
   </div>
 
-  <p class="text-xl font-bold mt-4">Search for {avatarState.isGroup ? 'members' : 'contacts'}</p>
+  <p class="text-xl font-bold mt-4">
+    Search for {avatarState.isGroup ? 'members' : 'contacts'}
+  </p>
   <SearchAvatar
     selectedAddress={context.selectedAddress}
     {oninvite}

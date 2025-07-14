@@ -12,7 +12,11 @@
     maxAmountCircles?: number;
   }
 
-  let { balanceRow, amount = $bindable(0), maxAmountCircles = -1 }: Props = $props();
+  let {
+    balanceRow,
+    amount = $bindable(0),
+    maxAmountCircles = -1,
+  }: Props = $props();
 
   let inputElement: HTMLInputElement = $state();
   let avatarWidth: string = '12rem';

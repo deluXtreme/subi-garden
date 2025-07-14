@@ -323,39 +323,6 @@ async function executeModuleInstallation(
   }
 }
 
-// TODO: No longer needed - replaced by simpler enable module logic
-// Module preparation functions adapted from subscribeTx.tsx
-export async function prepareEnableModuleTransactions(
-  safeAddress: Address,
-  moduleAddress: Address = SUBSCRIPTION_MODULE,
-  salt: bigint = DEFAULT_SALT
-): Promise<MetaTransactionData[]> {
-  const { tx: deployModuleTx, predictedAddress: moduleProxyAddress } =
-    await buildModuleDeploymentTx(safeAddress, salt);
-
-  const provider = new ethers.JsonRpcProvider(GNOSIS_RPC_URL);
-
-  const [code, installedSafes] = await Promise.all([
-    provider.getCode(moduleProxyAddress),
-    getSafesForModule(moduleProxyAddress),
-  ]);
-
-  const isDeployed = code !== '0x';
-  const isInstalled = installedSafes.includes(safeAddress);
-
-  const enableModuleTx = buildEnableModuleTx(safeAddress, moduleProxyAddress);
-  const moduleApprovalTx = buildModuleApprovalTx(
-    HUB_ADDRESS,
-    moduleProxyAddress
-  );
-
-  return [
-    ...(isDeployed ? [] : [deployModuleTx]),
-    ...(isInstalled ? [] : [enableModuleTx]),
-    moduleApprovalTx,
-  ];
-}
-
 function buildEnableModuleTx(
   safeAddress: Address,
   moduleAddress: Address

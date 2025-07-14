@@ -18,24 +18,30 @@
   async function connectWallet() {
     CirclesStorage.getInstance().data = {
       privateKey: privateKey,
-      walletType: 'circles'
+      walletType: 'circles',
     };
     $wallet = await initializeWallet('circles');
     const network = await ($wallet as any).provider?.getNetwork();
-    const circlesConfig = await getCirclesConfig(network.chainId, environment.ring);
+    const circlesConfig = await getCirclesConfig(
+      network.chainId,
+      environment.ring
+    );
     $circles = new Sdk($wallet!, circlesConfig);
   }
 
   onMount(async () => {
     $wallet = undefined;
-    privateKey = CirclesStorage.getInstance().privateKey ?? "";
+    privateKey = CirclesStorage.getInstance().privateKey ?? '';
     if (privateKey) {
       CirclesStorage.getInstance().data = {
-        walletType: 'circles'
+        walletType: 'circles',
       };
       $wallet = await initializeWallet('circles');
-    const network = await ($wallet as any).provider?.getNetwork();
-    const circlesConfig = await getCirclesConfig(network.chainId, environment.ring);
+      const network = await ($wallet as any).provider?.getNetwork();
+      const circlesConfig = await getCirclesConfig(
+        network.chainId,
+        environment.ring
+      );
       $circles = new Sdk($wallet!, circlesConfig);
     }
   });
@@ -60,9 +66,14 @@
     <button
       onclick={connectWallet}
       class="btn btn-sm"
-      class:btn-disabled={!hasValidKey}>Import
+      class:btn-disabled={!hasValidKey}
+      >Import
     </button>
   {:else}
-    <ConnectSafe safeOwnerAddress={$wallet?.address} chainId={100n} walletType="circles" />
+    <ConnectSafe
+      safeOwnerAddress={$wallet?.address}
+      chainId={100n}
+      walletType="circles"
+    />
   {/if}
 </div>

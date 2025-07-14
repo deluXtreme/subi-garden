@@ -14,4 +14,3 @@
 <div class="mb-4">
   <CurrencyInput balanceRow={asset} bind:amount {maxAmountCircles} />
 </div>
-

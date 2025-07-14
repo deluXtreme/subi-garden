@@ -12,7 +12,10 @@ export function getTypeString(type: string): string {
   return typeMap[type ?? ''] || 'None';
 }
 
-export function formatTrustRelation(relation: TrustRelation | undefined, profile?: Profile) {
+export function formatTrustRelation(
+  relation: TrustRelation | undefined,
+  profile?: Profile
+) {
   switch (relation) {
     case 'trusts':
       return `You accept ${profile ? profile.name + '’s' : 'their'} tokens`;
@@ -30,12 +33,20 @@ export function formatTrustRelation(relation: TrustRelation | undefined, profile
 }
 
 export async function getCirclesConfig(chainId: bigint, rings: boolean) {
-  let circlesConfig: CirclesConfig
+  let circlesConfig: CirclesConfig;
   if (chainId === 100n) {
-    rings ? circlesConfig = (await import('$lib/circlesConfig')).gnosisConfig.rings : circlesConfig = (await import('$lib/circlesConfig')).gnosisConfig.production;
+    rings
+      ? (circlesConfig = (await import('$lib/circlesConfig')).gnosisConfig
+          .rings)
+      : (circlesConfig = (await import('$lib/circlesConfig')).gnosisConfig
+          .production);
     return circlesConfig;
   } else if (chainId === 10200n) {
-    rings ? circlesConfig = (await import('$lib/circlesConfig')).chiadoConfig.rings : circlesConfig = (await import('$lib/circlesConfig')).chiadoConfig.production;
+    rings
+      ? (circlesConfig = (await import('$lib/circlesConfig')).chiadoConfig
+          .rings)
+      : (circlesConfig = (await import('$lib/circlesConfig')).chiadoConfig
+          .production);
     return circlesConfig;
   }
   throw new Error(`Unsupported chain-id: ${chainId}`);

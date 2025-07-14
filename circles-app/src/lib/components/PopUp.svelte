@@ -29,9 +29,7 @@
       {#if $popupState.content}
         {@const SvelteComponent = $popupState.content.component}
         <div class="mt-14">
-          <SvelteComponent
-            {...$popupState.content.props}
-          />
+          <SvelteComponent {...$popupState.content.props} />
         </div>
       {/if}
     </div>
