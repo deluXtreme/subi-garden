@@ -189,6 +189,7 @@ export async function createSubscriptionFlow(
 export async function createSubscriptionFlowBatched(
   params: SubscriptionParams
 ): Promise<SubscriptionResult> {
+  console.log("subscription request", params);
   const { subscriber, recipient, amount, frequency, category } = params;
 
   // First check if module is installed
@@ -200,65 +201,6 @@ export async function createSubscriptionFlowBatched(
 
     try {
       const { signer } = getCirclesConnection();
-
-      // Create enable module call data
-      const enableModuleInterface = new ethers.Interface([
-        'function enableModule(address module)',
-      ]);
-      const enableModuleData = enableModuleInterface.encodeFunctionData(
-        'enableModule',
-        [SUBSCRIPTION_MODULE]
-      );
-
-      // Create subscription call data
-      const subscribeInterface = new ethers.Interface([
-        {
-          type: 'function',
-          name: 'subscribe',
-          inputs: [
-            { name: 'recipient', type: 'address' },
-            { name: 'amount', type: 'uint256' },
-            { name: 'frequency', type: 'uint256' },
-            { name: 'category', type: 'uint8' },
-          ],
-          outputs: [{ name: 'id', type: 'bytes32' }],
-        },
-      ]);
-      const subscribeData = subscribeInterface.encodeFunctionData('subscribe', [
-        recipient,
-        ethers.parseEther(amount.toString()),
-        BigInt(frequency),
-        category,
-      ]);
-
-      // Use Safe's MultiSend to batch the transactions
-      const MULTISEND_ADDRESS = '0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526'; // Gnosis Chain MultiSend
-
-      // Encode the batched transactions
-      const enableTxData = ethers.solidityPacked(
-        ['uint8', 'address', 'uint256', 'uint256', 'bytes'],
-        [0, subscriber, 0, enableModuleData.length / 2 - 1, enableModuleData]
-      );
-
-      const subscribeTxData = ethers.solidityPacked(
-        ['uint8', 'address', 'uint256', 'uint256', 'bytes'],
-        [0, SUBSCRIPTION_MODULE, 0, subscribeData.length / 2 - 1, subscribeData]
-      );
-
-      const batchedTxData = ethers.concat([enableTxData, subscribeTxData]);
-
-      // Create MultiSend call
-      const multisendInterface = new ethers.Interface([
-        'function multiSend(bytes transactions)',
-      ]);
-      const multisendData = multisendInterface.encodeFunctionData('multiSend', [
-        batchedTxData,
-      ]);
-
-      // Execute via Safe's execTransaction
-      const safeInterface = new ethers.Interface([
-        'function execTransaction(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, bytes signatures) returns (bool success)',
-      ]);
 
       // Use batched calls for single signature UX
       const batchCalls = await createSubscriptionBatchCalls({
