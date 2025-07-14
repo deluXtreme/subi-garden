@@ -64,7 +64,7 @@ export async function sendCalls(
   const resolvedChainId =
     chainId ??
     (await signer.provider!.getNetwork().then((n) => Number(n.chainId)));
-  const resolvedAccount = account ?? (await signer.getAddress());
+  const resolvedAccount = account;
 
   if (!resolvedChainId) {
     throw new Error('Could not determine chain ID');
