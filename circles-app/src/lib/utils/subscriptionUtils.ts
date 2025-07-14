@@ -1,19 +1,13 @@
 import type { Address } from '@circles-sdk/utils';
 import {
   HUB_ADDRESS,
-  MODULE_PROXY_FACTORY,
   SUBSCRIPTION_MODULE,
-  SUBSCRIPTION_MASTER_COPY,
-  SUBSCRIPTION_MANAGER,
   DEFAULT_SALT,
   GNOSIS_RPC_URL,
-  SAFE_TRANSACTION_SERVICE_URL,
 } from '$lib/constants/contracts';
 import {
   createSubscription,
   checkUserModule,
-  approveModuleForHub,
-  registerModule,
   executeTransactionBatch,
   formatContractError,
   getCirclesConnection,
@@ -26,7 +20,6 @@ import {
   sendCalls,
   createSubscriptionBatchCalls,
   formatBatchCallError,
-  checkBatchCallSupport,
 } from './sendCalls';
 import { ethers } from 'ethers';
 
@@ -363,48 +356,6 @@ export async function prepareEnableModuleTransactions(
   ];
 }
 
-// TODO: No longer needed - we now use a single SUBSCRIPTION_MODULE instead of deploying per-Safe modules
-async function buildModuleDeploymentTx(
-  safeAddress: Address,
-  salt: bigint = DEFAULT_SALT
-): Promise<{ tx: MetaTransactionData; predictedAddress: Address }> {
-  const abiCoder = ethers.AbiCoder.defaultAbiCoder();
-  const initParams = abiCoder.encode(
-    ['address', 'address', 'address'],
-    [safeAddress, safeAddress, safeAddress]
-  );
-
-  const setupInterface = new ethers.Interface([
-    'function setUp(bytes memory initParams)',
-  ]);
-  const initData = setupInterface.encodeFunctionData('setUp', [initParams]);
-
-  const deployInterface = new ethers.Interface([
-    'function deployModule(address masterCopy,bytes memory initializer, uint256 saltNonce) public returns (address proxy)',
-  ]);
-  const deployData = deployInterface.encodeFunctionData('deployModule', [
-    SUBSCRIPTION_MASTER_COPY,
-    initData,
-    salt,
-  ]);
-
-  const predictedAddress = await predictMinimalProxyAddress({
-    factory: MODULE_PROXY_FACTORY,
-    masterCopy: SUBSCRIPTION_MASTER_COPY,
-    initializer: initData,
-    saltNonce: salt,
-  });
-
-  return {
-    tx: {
-      to: MODULE_PROXY_FACTORY.toString(),
-      value: '0',
-      data: deployData,
-    },
-    predictedAddress,
-  };
-}
-
 function buildEnableModuleTx(
   safeAddress: Address,
   moduleAddress: Address
@@ -477,58 +428,4 @@ function predictMinimalProxyAddress({
   );
 
   return predictedAddress as Address;
-}
-
-/**
- * TODO: No longer needed - we now use a single SUBSCRIPTION_MODULE instead of per-Safe deployments
- * Calculate the predicted SubscriptionModule address for a given Safe
- * In the new architecture, each Safe deploys its own SubscriptionModule instance
- */
-export function getModuleAddressForSafe(
-  safeAddress: Address,
-  salt: bigint = DEFAULT_SALT
-): Address {
-  const abiCoder = ethers.AbiCoder.defaultAbiCoder();
-  const initParams = abiCoder.encode(
-    ['address', 'address', 'address'],
-    [safeAddress, safeAddress, safeAddress]
-  );
-
-  const setupInterface = new ethers.Interface([
-    'function setUp(bytes memory initParams)',
-  ]);
-  const initData = setupInterface.encodeFunctionData('setUp', [initParams]);
-
-  return predictMinimalProxyAddress({
-    factory: MODULE_PROXY_FACTORY,
-    masterCopy: SUBSCRIPTION_MASTER_COPY,
-    initializer: initData,
-    saltNonce: salt,
-  });
-}
-
-// TODO: No longer needed - we don't need to check which Safes have the module deployed
-async function getSafesForModule(moduleAddress: string): Promise<Address[]> {
-  const url = `${SAFE_TRANSACTION_SERVICE_URL}/modules/${moduleAddress}/safes/`;
-
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch safes for module ${moduleAddress}: ${response.statusText}`
-      );
-    }
-
-    const data: { safes: string[] } = await response.json();
-    return data.safes.map((x) => ethers.getAddress(x) as Address);
-  } catch (error) {
-    console.error('Error fetching safes for module:', error);
-    return [];
-  }
 }

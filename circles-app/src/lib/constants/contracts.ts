@@ -10,15 +10,7 @@ export const MODULE_PROXY_FACTORY =
 // SUBSCRIPTION_MODULE is a single deployed contract that all Safes can enable
 // Each Safe simply enables this module instead of deploying their own instance
 export const SUBSCRIPTION_MODULE =
-  '0xD5dC464dD561782615D7495d1d7CEd301083c750' as const;
-
-// TODO: No longer needed - legacy addresses from old per-Safe deployment architecture
-export const SUBSCRIPTION_MASTER_COPY =
-  '0x80242DCdc1bDfA3271D993cE3a4E568B54981E3C' as const;
-
-// Legacy subscription manager - deprecated in favor of direct module interaction
-export const SUBSCRIPTION_MANAGER =
-  '0x7E9BaF7CC7cD83bACeFB9B2D5c5124C0F9c30834' as const;
+  '0x48BC28f8757cF5dc38eE7219DFf1c1F2b768737D' as const;
 
 // Network configuration
 export const GNOSIS_RPC_URL = 'https://rpc.gnosischain.com/' as const;
