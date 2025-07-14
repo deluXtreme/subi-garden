@@ -9,7 +9,6 @@ import {
 } from '$lib/constants/contracts';
 import { SubscriptionCategory } from '$lib/types/subscriptions';
 import type { Address } from '@circles-sdk/utils';
-// Removed getModuleAddressForSafe import - no longer needed with single SUBSCRIPTION_MODULE
 
 // Updated SubscriptionModule ABI for new contract interface
 const SUBSCRIPTION_MODULE_ABI = [
