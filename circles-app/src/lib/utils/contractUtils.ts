@@ -307,7 +307,10 @@ export async function getSubscriptionIds(
 /**
  * Check if user has the subscription module enabled on their Safe
  */
-export async function checkUserModule(userAddress: Address): Promise<{
+export async function checkUserModule(
+  userAddress: Address,
+  module: Address
+): Promise<{
   hasModule: boolean;
   moduleAddress?: Address;
 }> {
@@ -330,13 +333,11 @@ export async function checkUserModule(userAddress: Address): Promise<{
     );
 
     // Check if SUBSCRIPTION_MODULE is enabled on this Safe
-    const isEnabled = (await safeContract.isModuleEnabled(
-      SUBSCRIPTION_MODULE
-    )) as boolean;
+    const isEnabled = (await safeContract.isModuleEnabled(module)) as boolean;
 
     return {
       hasModule: isEnabled,
-      moduleAddress: isEnabled ? SUBSCRIPTION_MODULE : undefined,
+      moduleAddress: isEnabled ? module : undefined,
     };
   } catch (error) {
     console.error('Error checking module installation:', error);

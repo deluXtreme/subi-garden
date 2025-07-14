@@ -47,12 +47,15 @@ export interface MetaTransactionData {
 /**
  * Check if user has a subscription module installed
  */
-export async function checkModuleInstalled(userAddress: string): Promise<{
+export async function checkModuleInstalled(
+  userAddress: string,
+  module: Address
+): Promise<{
   hasModule: boolean;
   moduleAddress?: string;
 }> {
   try {
-    return await checkUserModule(userAddress as Address);
+    return await checkUserModule(userAddress as Address, module);
   } catch (error) {
     console.error('Error checking module installation:', error);
     return { hasModule: false };
@@ -65,12 +68,14 @@ export async function checkModuleInstalled(userAddress: string): Promise<{
 export async function prepareModuleInstallation(
   safeAddress: string
 ): Promise<ModuleInstallationResult> {
-  const { hasModule, moduleAddress } = await checkModuleInstalled(safeAddress);
+  const { hasModule } = await checkModuleInstalled(
+    safeAddress,
+    SUBSCRIPTION_MODULE
+  );
 
   if (hasModule) {
     return {
       needsModuleInstall: false,
-      moduleAddress,
     };
   }
 
@@ -100,6 +105,7 @@ export async function prepareModuleInstallation(
 export async function createSubscriptionFlow(
   params: SubscriptionParams
 ): Promise<SubscriptionResult> {
+  console.log('subscription request', params);
   const { subscriber, recipient, amount, frequency, category } = params;
 
   // First check if module is installed
@@ -194,65 +200,6 @@ export async function createSubscriptionFlowBatched(
     try {
       const { signer } = getCirclesConnection();
 
-      // Create enable module call data
-      const enableModuleInterface = new ethers.Interface([
-        'function enableModule(address module)',
-      ]);
-      const enableModuleData = enableModuleInterface.encodeFunctionData(
-        'enableModule',
-        [SUBSCRIPTION_MODULE]
-      );
-
-      // Create subscription call data
-      const subscribeInterface = new ethers.Interface([
-        {
-          type: 'function',
-          name: 'subscribe',
-          inputs: [
-            { name: 'recipient', type: 'address' },
-            { name: 'amount', type: 'uint256' },
-            { name: 'frequency', type: 'uint256' },
-            { name: 'category', type: 'uint8' },
-          ],
-          outputs: [{ name: 'id', type: 'bytes32' }],
-        },
-      ]);
-      const subscribeData = subscribeInterface.encodeFunctionData('subscribe', [
-        recipient,
-        ethers.parseEther(amount.toString()),
-        BigInt(frequency),
-        category,
-      ]);
-
-      // Use Safe's MultiSend to batch the transactions
-      const MULTISEND_ADDRESS = '0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526'; // Gnosis Chain MultiSend
-
-      // Encode the batched transactions
-      const enableTxData = ethers.solidityPacked(
-        ['uint8', 'address', 'uint256', 'uint256', 'bytes'],
-        [0, subscriber, 0, enableModuleData.length / 2 - 1, enableModuleData]
-      );
-
-      const subscribeTxData = ethers.solidityPacked(
-        ['uint8', 'address', 'uint256', 'uint256', 'bytes'],
-        [0, SUBSCRIPTION_MODULE, 0, subscribeData.length / 2 - 1, subscribeData]
-      );
-
-      const batchedTxData = ethers.concat([enableTxData, subscribeTxData]);
-
-      // Create MultiSend call
-      const multisendInterface = new ethers.Interface([
-        'function multiSend(bytes transactions)',
-      ]);
-      const multisendData = multisendInterface.encodeFunctionData('multiSend', [
-        batchedTxData,
-      ]);
-
-      // Execute via Safe's execTransaction
-      const safeInterface = new ethers.Interface([
-        'function execTransaction(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, bytes signatures) returns (bool success)',
-      ]);
-
       // Use batched calls for single signature UX
       const batchCalls = await createSubscriptionBatchCalls({
         signer,
@@ -303,26 +250,6 @@ export async function createSubscriptionFlowBatched(
   );
 }
 
-/**
- * Execute module installation transactions
- */
-async function executeModuleInstallation(
-  transactions: MetaTransactionData[]
-): Promise<void> {
-  try {
-    console.log('Installing subscription module...', transactions);
-
-    // Execute transactions using the new executeTransactionBatch function
-    const txHashes = await executeTransactionBatch(transactions);
-
-    console.log('Module installation completed, transaction hashes:', txHashes);
-  } catch (error) {
-    console.error('Error executing module installation:', error);
-    const formattedError = formatContractError(error);
-    throw new Error(`Module installation failed: ${formattedError}`);
-  }
-}
-
 function buildEnableModuleTx(
   safeAddress: Address,
   moduleAddress: Address
@@ -339,60 +266,4 @@ function buildEnableModuleTx(
     value: '0',
     data: enableModuleData,
   };
-}
-
-// TODO: No longer needed - module approval is handled separately if needed
-function buildModuleApprovalTx(
-  hubAddress: Address,
-  moduleProxyAddress: Address = SUBSCRIPTION_MODULE
-): MetaTransactionData {
-  const approvalInterface = new ethers.Interface([
-    'function setApprovalForAll(address operator, bool approved)',
-  ]);
-  const approvalData = approvalInterface.encodeFunctionData(
-    'setApprovalForAll',
-    [moduleProxyAddress, true]
-  );
-
-  return {
-    to: hubAddress,
-    value: '0',
-    data: approvalData,
-  };
-}
-
-// TODO: No longer needed - we now use a single SUBSCRIPTION_MODULE instead of calculating proxy addresses
-function predictMinimalProxyAddress({
-  factory,
-  masterCopy,
-  initializer,
-  saltNonce,
-}: {
-  factory: Address;
-  masterCopy: Address;
-  initializer: string;
-  saltNonce: bigint | number;
-}): Address {
-  const initializerHash = ethers.keccak256(initializer);
-  const abiCoder = ethers.AbiCoder.defaultAbiCoder();
-  const salt = ethers.keccak256(
-    abiCoder.encode(
-      ['bytes32', 'uint256'],
-      [initializerHash, BigInt(saltNonce)]
-    )
-  );
-
-  const prefix = '0x602d8060093d393df3363d3d373d3d3d363d73';
-  const suffix = '0x5af43d82803e903d91602b57fd5bf3';
-
-  const initCode = ethers.concat([prefix, masterCopy, suffix]);
-  const bytecodeHash = ethers.keccak256(initCode);
-
-  const predictedAddress = ethers.getCreate2Address(
-    factory,
-    salt,
-    bytecodeHash
-  );
-
-  return predictedAddress as Address;
 }
