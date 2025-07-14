@@ -66,16 +66,21 @@
 
   interface Props {
     balances: Readable<{
-    data: TokenBalanceRow[];
-    next: () => Promise<boolean>;
-    ended: boolean;
-  }>;
+      data: TokenBalanceRow[];
+      next: () => Promise<boolean>;
+      ended: boolean;
+    }>;
     selectedAsset?: TokenBalanceRow | undefined;
     showTransitive?: boolean;
     onselect: (tokenBalanceRow: TokenBalanceRow) => void;
   }
 
-  let { balances, selectedAsset = $bindable(undefined), showTransitive = true, onselect }: Props = $props();
+  let {
+    balances,
+    selectedAsset = $bindable(undefined),
+    showTransitive = true,
+    onselect,
+  }: Props = $props();
 
   const handleSelect = (tokenBalanceRow: TokenBalanceRow) => {
     selectedAsset = tokenBalanceRow;
@@ -106,7 +111,9 @@
         <Avatar
           address={balance.tokenOwner}
           view="horizontal"
-          bottomInfo={tokenTypeToString(balance.tokenType) + ' - ' + shortenAddress(balance.tokenOwner)}
+          bottomInfo={tokenTypeToString(balance.tokenType) +
+            ' - ' +
+            shortenAddress(balance.tokenOwner)}
         />
         <div class="col text-right">
           <span class="font-medium">{roundToDecimals(balance.circles)}</span>

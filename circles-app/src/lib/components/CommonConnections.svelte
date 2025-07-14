@@ -12,7 +12,8 @@
   }
 
   // Props with default
-  let { otherAvatarAddress, commonConnectionsCount = $bindable(0) }: Props = $props();
+  let { otherAvatarAddress, commonConnectionsCount = $bindable(0) }: Props =
+    $props();
 
   // Local state
   let commonContacts: Address[] = $state([]);
@@ -26,7 +27,10 @@
     // The plugin will return an array of addresses both trust or mutually trust.
     // Exactly which relationships count as "common trust" is up to the node’s RPC logic,
     // but presumably it’s all addresses that appear in both trust sets.
-    const common = await $circles.data.rpc.call<Address[]>('circles_getCommonTrust', [avatarState.avatar.address, otherAvatarAddress]);
+    const common = await $circles.data.rpc.call<Address[]>(
+      'circles_getCommonTrust',
+      [avatarState.avatar.address, otherAvatarAddress]
+    );
     // ^ This returns something like an array of addresses: ["0xabc...", "0x123..."]
 
     // 3) Set them to local state

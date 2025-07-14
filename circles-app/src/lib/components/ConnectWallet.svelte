@@ -1,5 +1,4 @@
 <script lang="ts">
-
   interface Props {
     imgUrl: string;
     header: string;
@@ -13,7 +12,7 @@
     header,
     desc,
     route,
-    recommended = undefined
+    recommended = undefined,
   }: Props = $props();
 </script>
 

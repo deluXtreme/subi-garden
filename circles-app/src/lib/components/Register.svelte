@@ -6,12 +6,7 @@
     route: string;
   }
 
-  let {
-    imgUrl,
-    header,
-    desc,
-    route
-  }: Props = $props();
+  let { imgUrl, header, desc, route }: Props = $props();
 </script>
 
 <div

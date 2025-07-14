@@ -1,6 +1,10 @@
 import type { Address } from '@circles-sdk/utils';
 import type { Sdk } from '@circles-sdk/sdk';
-import { CirclesQuery, type GroupRow, type PagedQueryParams } from '@circles-sdk/data';
+import {
+  CirclesQuery,
+  type GroupRow,
+  type PagedQueryParams,
+} from '@circles-sdk/data';
 
 // export async function getBaseAndCmgGroupsByOwnerBatch(
 //   sdk: Sdk,
@@ -28,7 +32,10 @@ import { CirclesQuery, type GroupRow, type PagedQueryParams } from '@circles-sdk
 //   return acc
 // }
 
-export async function getBaseAndCmgGroupsByOwnerBatch(sdk: Sdk, owners: Address[]): Promise<Record<Address, GroupRow[]>> {
+export async function getBaseAndCmgGroupsByOwnerBatch(
+  sdk: Sdk,
+  owners: Address[]
+): Promise<Record<Address, GroupRow[]>> {
   if (owners.length === 0 || !sdk) {
     return {};
   }
@@ -45,19 +52,21 @@ export async function getBaseAndCmgGroupsByOwnerBatch(sdk: Sdk, owners: Address[
       'group',
       'owner',
     ],
-    filter: [{
-      Type: 'FilterPredicate',
-      FilterType: 'In',
-      Column: 'owner',
-      Value: owners.map(o => o.toLowerCase() as Address),
-    }],
+    filter: [
+      {
+        Type: 'FilterPredicate',
+        FilterType: 'In',
+        Column: 'owner',
+        Value: owners.map((o) => o.toLowerCase() as Address),
+      },
+    ],
     sortOrder: 'DESC',
     limit: 1000,
   };
 
   const query = new CirclesQuery(sdk.circlesRpc, BaseQueryDefintion);
   const results = [];
-  const acc: Record<Address, GroupRow[]>= {};
+  const acc: Record<Address, GroupRow[]> = {};
 
   while (await query.queryNextPage()) {
     const resultRows = query.currentPage?.results ?? [];

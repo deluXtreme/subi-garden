@@ -33,16 +33,18 @@ export const contacts = writable<{
 
 export const initContactStore = ($avatar: Avatar) => {
   if (currentStoreUnsubscribe) {
-		currentStoreUnsubscribe();
-		currentStoreUnsubscribe = undefined;
-	}
+    currentStoreUnsubscribe();
+    currentStoreUnsubscribe = undefined;
+  }
 
-	currentQuery = undefined;
+  currentQuery = undefined;
 
-  currentQuery = createContactsQueryStore($avatar, $avatar.address, refreshOnEvents);
+  currentQuery = createContactsQueryStore(
+    $avatar,
+    $avatar.address,
+    refreshOnEvents
+  );
   currentQuery.then((store) => {
     currentStoreUnsubscribe = store.subscribe(contacts.set);
   });
-}
-
-
+};

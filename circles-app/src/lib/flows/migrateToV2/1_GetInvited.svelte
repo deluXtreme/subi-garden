@@ -15,21 +15,27 @@
     context?: MigrateToV2Context;
   }
 
-  let { context = $bindable({
-    inviter: undefined,
-    profile: <Profile>{
-      name: ''
-    },
-    trustList: []
-  }) }: Props = $props();
+  let {
+    context = $bindable({
+      inviter: undefined,
+      profile: <Profile>{
+        name: '',
+      },
+      trustList: [],
+    }),
+  }: Props = $props();
   let canSelfMigrate = $state(false);
   let invitations: AvatarRow[] | undefined = $state();
   onMount(async () => {
     if (!avatarState.avatar?.avatarInfo || !$circles) {
       throw new Error('Avatar store or SDK not initialized');
     }
-    canSelfMigrate = environment.ring ? true : await $circles.canSelfMigrate(avatarState.avatar.avatarInfo);
-    invitations = await $circles.data.getInvitations(avatarState.avatar.avatarInfo.avatar);
+    canSelfMigrate = environment.ring
+      ? true
+      : await $circles.canSelfMigrate(avatarState.avatar.avatarInfo);
+    invitations = await $circles.data.getInvitations(
+      avatarState.avatar.avatarInfo.avatar
+    );
   });
   async function next() {
     popupControls.open({

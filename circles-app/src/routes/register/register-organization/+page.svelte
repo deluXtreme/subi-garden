@@ -20,15 +20,15 @@
     }
 
     //TODO: why need to bind it as Avatar
-    avatarState.avatar = await $circles.registerOrganizationV2(profile) as Avatar;
+    avatarState.avatar = (await $circles.registerOrganizationV2(
+      profile
+    )) as Avatar;
 
     await goto('/dashboard');
   }
 </script>
 
-<div
-  class="w-full flex flex-col min-h-screen max-w-xl gap-y-4 justify-center"
->
+<div class="w-full flex flex-col min-h-screen max-w-xl gap-y-4 justify-center">
   <div class="w-full">
     <button onclick={() => history.back()}>
       <img src="/arrow-left.svg" alt="Arrow Left" class="w-4 h-4" />

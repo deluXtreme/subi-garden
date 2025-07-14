@@ -1,3 +1,3 @@
 export const environment = $state({
-	ring: false,
+  ring: false,
 });

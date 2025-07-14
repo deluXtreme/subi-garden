@@ -63,7 +63,9 @@ export function createEventStore<T>(
   handleEvent: EventHandler<T>,
   handleNextPage: NextPageFunction<T>,
   initialData: T,
-  dataComparator?: T extends Array<infer U> ? (a: U, b: U) => number : undefined,
+  dataComparator?: T extends Array<infer U>
+    ? (a: U, b: U) => number
+    : undefined,
   debounceDelay = 50
 ): Readable<{ data: T; next: () => Promise<boolean>; ended: boolean }> {
   let timeout: any;
@@ -95,10 +97,10 @@ export function createEventStore<T>(
       }
 
       /**
-     * Loads the next page of data by calling `handleNextPage` and updates the store.
-     *
-     * @returns {Promise<boolean>} - A promise resolving to whether pagination has ended.
-     */
+       * Loads the next page of data by calling `handleNextPage` and updates the store.
+       *
+       * @returns {Promise<boolean>} - A promise resolving to whether pagination has ended.
+       */
       async function next(): Promise<boolean> {
         await initialPromise;
         const { data, ended } = await handleNextPage(storeData);
@@ -110,8 +112,8 @@ export function createEventStore<T>(
       setData(storeData); // Initialize the store with the initial data
 
       /**
-     * Processes debounced events and updates the store's data.
-     */
+       * Processes debounced events and updates the store's data.
+       */
       const processEvents = async () => {
         if (!lastEvent) return;
         const data = await handleEvent(lastEvent, storeData);
@@ -120,10 +122,10 @@ export function createEventStore<T>(
       };
 
       /**
-     * Handles incoming events by debouncing their processing.
-     *
-     * @param {CirclesEvent} event - The event to process.
-     */
+       * Handles incoming events by debouncing their processing.
+       *
+       * @param {CirclesEvent} event - The event to process.
+       */
       const eventHandler = (event: CirclesEvent) => {
         if (!eventTypes.has(event.$event)) return;
         lastEvent = event;

@@ -1,7 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { select } from 'd3-selection';
-  import { sankey, sankeyLinkHorizontal, type SankeyNode, type SankeyLink } from 'd3-sankey';
+  import {
+    sankey,
+    sankeyLinkHorizontal,
+    type SankeyNode,
+    type SankeyLink,
+  } from 'd3-sankey';
   import { scaleOrdinal } from 'd3-scale';
   import { schemeCategory10 } from 'd3-scale-chromatic';
   import { formatEther } from 'ethers';
@@ -20,7 +25,8 @@
     name: string;
   }
 
-  interface SankeyLinkExtra extends SankeyLink<SankeyNodeExtra, { value: number }> {
+  interface SankeyLinkExtra
+    extends SankeyLink<SankeyNodeExtra, { value: number }> {
     value: number;
   }
 
@@ -90,9 +96,7 @@
     select(svgEl).selectAll('*').remove();
 
     // Create main svg
-    const svg = select(svgEl)
-      .attr('width', '100%')
-      .attr('height', height);
+    const svg = select(svgEl).attr('width', '100%').attr('height', height);
 
     const color = scaleOrdinal(schemeCategory10);
 
@@ -134,8 +138,14 @@
       .attr('dy', '0.35em')
       .attr('text-anchor', 'end')
       .text((d) => {
-        const inflow = (d.targetLinks || []).reduce((acc, l) => acc + l.value, 0);
-        const outflow = (d.sourceLinks || []).reduce((acc, l) => acc + l.value, 0);
+        const inflow = (d.targetLinks || []).reduce(
+          (acc, l) => acc + l.value,
+          0
+        );
+        const outflow = (d.sourceLinks || []).reduce(
+          (acc, l) => acc + l.value,
+          0
+        );
         return `${shortenAddress(d.name)} (in=${inflow.toFixed(2)}, out=${outflow.toFixed(2)})`;
       })
       .filter((d) => (d.x0 || 0) < width / 2)

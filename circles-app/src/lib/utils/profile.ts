@@ -29,7 +29,7 @@ export enum FallbackImageUrl {
 function setFallbackValues(
   address: string,
   avatar: AvatarRow | undefined,
-  profile: Profile | undefined,
+  profile: Profile | undefined
 ): Profile {
   const fallbackProfile: Profile = {
     name: shortenAddress(address),
@@ -37,7 +37,10 @@ function setFallbackValues(
   };
 
   // Assign the correct fallback image
-  if (!profile?.previewImageUrl && (avatar?.type === 'CrcV2_RegisterHuman' || avatar?.type === 'CrcV1_Signup')) {
+  if (
+    !profile?.previewImageUrl &&
+    (avatar?.type === 'CrcV2_RegisterHuman' || avatar?.type === 'CrcV1_Signup')
+  ) {
     fallbackProfile.previewImageUrl = FallbackImageUrl.Person;
   }
   if (avatar?.type === 'CrcV2_RegisterGroup') {
@@ -73,10 +76,15 @@ function setFallbackValues(
  *    - Collects CIDs, calls `profiles.getMany` in a single call or chunk if needed
  *    - Builds final Profiles in a Map(address->Profile)
  */
-async function fetchProfiles(addresses: Address[]): Promise<Map<Address, Profile>> {
+async function fetchProfiles(
+  addresses: Address[]
+): Promise<Map<Address, Profile>> {
   const sdk = get(circles);
   if (!sdk) throw new Error('No SDK instance found.');
-  if (!sdk.profiles) throw new Error('No sdk.profiles instance found. Is the profile service url configured?');
+  if (!sdk.profiles)
+    throw new Error(
+      'No sdk.profiles instance found. Is the profile service url configured?'
+    );
 
   // 1) Fetch avatar info for all addresses in one go
   const avatars = await sdk.data.getAvatarInfoBatch(addresses);
@@ -88,9 +96,7 @@ async function fetchProfiles(addresses: Address[]): Promise<Map<Address, Profile
   }
 
   // 3) Gather all CIDs
-  const cids: string[] = avatars
-    .filter((a) => a.cidV0)
-    .map((a) => a.cidV0!);
+  const cids: string[] = avatars.filter((a) => a.cidV0).map((a) => a.cidV0!);
 
   const uniqueCids = [...new Set(cids)];
 

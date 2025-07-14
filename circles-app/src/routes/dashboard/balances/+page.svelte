@@ -14,30 +14,29 @@
     [circlesBalances, filterVersion, filterType, filterToken],
     ([$circlesBalances, filterVersion, filterType, filterToken]) => {
       const filteredData = Object.entries($circlesBalances.data).filter(
-      ([_, balance]) => {
-        const byVersion =
-          filterVersion === undefined ||
-          balance.version === filterVersion;
+        ([_, balance]) => {
+          const byVersion =
+            filterVersion === undefined || balance.version === filterVersion;
 
-        const byType =
-          filterType === undefined ||
-          (filterType === 'personal'
-            ? !balance.isGroup
-            : filterType === 'group'
-            ? balance.isGroup
-            : true);
+          const byType =
+            filterType === undefined ||
+            (filterType === 'personal'
+              ? !balance.isGroup
+              : filterType === 'group'
+                ? balance.isGroup
+                : true);
 
-        const byToken =
-          filterToken === undefined ||
-          (filterToken === 'erc20'
-            ? balance.isErc20
-            : filterToken === 'erc1155'
-            ? balance.isErc1155
-            : true);
+          const byToken =
+            filterToken === undefined ||
+            (filterToken === 'erc20'
+              ? balance.isErc20
+              : filterToken === 'erc1155'
+                ? balance.isErc1155
+                : true);
 
-        return byVersion && byType && byToken;
-      }
-    );
+          return byVersion && byType && byToken;
+        }
+      );
 
       return {
         data: filteredData,

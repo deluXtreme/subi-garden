@@ -74,7 +74,9 @@
   let copyIcon = $state('/copy.svg');
 
   function handleCopy() {
-    navigator.clipboard.writeText(balance.isWrapped ? balance.tokenAddress : balance.tokenId);
+    navigator.clipboard.writeText(
+      balance.isWrapped ? balance.tokenAddress : balance.tokenId
+    );
     copyIcon = '/check.svg';
 
     setTimeout(() => {

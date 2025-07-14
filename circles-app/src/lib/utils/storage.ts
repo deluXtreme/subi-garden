@@ -37,12 +37,12 @@ export class CirclesStorage {
       group: localStorage.getItem('group') as Address,
       privateKey: localStorage.getItem('privateKey') || undefined,
       ...data,
-      version: CURRENT_VERSION
+      version: CURRENT_VERSION,
     };
 
     this.write(migratedData);
 
-    ['walletType', 'avatar', 'group', 'privateKey'].forEach(key => {
+    ['walletType', 'avatar', 'group', 'privateKey'].forEach((key) => {
       localStorage.removeItem(key);
     });
   }

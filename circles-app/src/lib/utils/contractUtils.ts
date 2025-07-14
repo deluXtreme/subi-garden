@@ -4,7 +4,6 @@ import { get } from 'svelte/store';
 import {
   GNOSIS_RPC_URL,
   SUBSCRIPTION_MODULE,
-  SUBSCRIPTION_MANAGER,
   HUB_ADDRESS,
 } from '$lib/constants/contracts';
 import { SubscriptionCategory } from '$lib/types/subscriptions';
@@ -96,27 +95,6 @@ const SUBSCRIPTION_MODULE_ABI = [
       { name: 'nextRedeemAt', type: 'uint256', indexed: false },
       { name: 'category', type: 'uint8', indexed: false },
     ],
-  },
-];
-
-// Legacy SubscriptionManager ABI - deprecated
-const SUBSCRIPTION_MANAGER_ABI = [
-  {
-    type: 'function',
-    name: 'modules',
-    inputs: [{ name: 'user', type: 'address' }],
-    outputs: [{ name: 'module', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    name: 'registerModule',
-    inputs: [
-      { name: 'module', type: 'address' },
-      { name: 'isEnabled', type: 'bool' },
-    ],
-    outputs: [],
-    stateMutability: 'nonpayable',
   },
 ];
 
@@ -413,42 +391,6 @@ export async function isModuleApprovedForHub(
   } catch (error) {
     console.error('Error checking module approval:', error);
     return false;
-  }
-}
-
-/**
- * TODO: No longer needed - module registration is handled differently in the new architecture
- * Register a module with the subscription manager
- */
-export async function registerModule(
-  moduleAddress: Address,
-  isEnabled: boolean = true
-): Promise<`0x${string}`> {
-  try {
-    const { signer } = getCirclesConnection();
-
-    const subscriptionManager = new ethers.Contract(
-      SUBSCRIPTION_MANAGER,
-      SUBSCRIPTION_MANAGER_ABI,
-      signer
-    );
-
-    const tx = await subscriptionManager.registerModule(
-      moduleAddress,
-      isEnabled
-    );
-    const receipt = await tx.wait();
-
-    if (!receipt || receipt.status === 0) {
-      throw new Error('Transaction failed');
-    }
-
-    return tx.hash as `0x${string}`;
-  } catch (error) {
-    console.error('Error registering module:', error);
-    throw new Error(
-      `Failed to register module: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
   }
 }
 

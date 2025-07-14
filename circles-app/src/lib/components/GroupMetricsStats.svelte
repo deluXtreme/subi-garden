@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { GroupMetrics } from "$lib/stores/groupMetrics.svelte";
+  import type { GroupMetrics } from '$lib/stores/groupMetrics.svelte';
 
   type Props = {
-    groupMetrics: GroupMetrics
-  }
+    groupMetrics: GroupMetrics;
+  };
 
   let { groupMetrics }: Props = $props();
 

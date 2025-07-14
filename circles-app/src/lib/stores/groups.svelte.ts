@@ -25,7 +25,6 @@ export interface CMGroupRow extends EventRow {
 }
 
 export const createCMGroups = (avatar: Avatar) => {
-
   const circlesInstance = get(circles);
   if (!circlesInstance) {
     throw new Error('Circles instance not found');
@@ -37,17 +36,20 @@ export const createCMGroups = (avatar: Avatar) => {
     limit: 25,
     columns: [],
     sortOrder: 'DESC',
-    filter: [{
-      Type: 'FilterPredicate',
-      FilterType: 'In',
-      Column: 'type',
-      Value: ['CrcV2_BaseGroupCreated', 'CrcV2_CMGroupCreated'],
-    }],
+    filter: [
+      {
+        Type: 'FilterPredicate',
+        FilterType: 'In',
+        Column: 'type',
+        Value: ['CrcV2_BaseGroupCreated', 'CrcV2_CMGroupCreated'],
+      },
+    ],
   };
 
   return createCirclesQueryStore<GroupRow>(
     avatar,
-    async () => new CirclesQuery<GroupRow>(circlesInstance.circlesRpc, queryDefinition),
-    groupEvents,
+    async () =>
+      new CirclesQuery<GroupRow>(circlesInstance.circlesRpc, queryDefinition),
+    groupEvents
   );
 };

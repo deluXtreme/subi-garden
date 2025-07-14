@@ -1,8 +1,5 @@
 <script lang="ts">
-  import {
-    onDestroy,
-    type Component,
-  } from 'svelte';
+  import { onDestroy, type Component } from 'svelte';
   import type { EventRow, TransactionHistoryRow } from '@circles-sdk/data';
   import { getKeyFromItem } from '$lib/stores/query/circlesQueryStore';
   import type { Readable } from 'svelte/store';
@@ -68,11 +65,7 @@
 <div class="w-full flex flex-col divide-y gap-y-2 overflow-x-auto py-4">
   {#each $store?.data ?? [] as item (getKeyFromItem(item))}
     {@const SvelteComponent_1 = row}
-    <button
-      onclick={() => {}}
-      class="w-full pt-2"
-      aria-label="Select item"
-    >
+    <button onclick={() => {}} class="w-full pt-2" aria-label="Select item">
       <SvelteComponent_1 {item} />
     </button>
   {/each}

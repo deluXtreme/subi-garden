@@ -42,9 +42,8 @@
     <button
       onclick={changeWallet}
       class="btn btn-sm btn-outline btn-primary text-primary hover:text-white"
-    >Change Avatar
-    </button
-    >
+      >Change Avatar
+    </button>
   </div>
 
   <div class="shadow-lg rounded-lg">
