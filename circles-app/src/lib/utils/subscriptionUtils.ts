@@ -116,7 +116,7 @@ export async function createSubscriptionFlow(
     console.log('Module not enabled, using batched transactions...');
 
     try {
-      const { signer } = getCirclesConnection();
+      const { signer, address } = getCirclesConnection();
 
       // Create batched calls: enable module + create subscription
       const batchCalls = await createSubscriptionBatchCalls({
@@ -135,6 +135,7 @@ export async function createSubscriptionFlow(
       // Send batched transaction
       const batchResult = await sendCalls({
         signer,
+        account: address,
         calls: batchCalls,
         experimentalFallback: true, // Allow fallback to individual transactions
         forceAtomic: false, // Don't require atomic execution for better compatibility
