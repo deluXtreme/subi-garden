@@ -10,7 +10,7 @@ export const MODULE_PROXY_FACTORY =
 // SUBSCRIPTION_MODULE is a single deployed contract that all Safes can enable
 // Each Safe simply enables this module instead of deploying their own instance
 export const SUBSCRIPTION_MODULE =
-  '0x48BC28f8757cF5dc38eE7219DFf1c1F2b768737D' as const;
+  '0xcEbE4B6d50Ce877A9689ce4516Fe96911e099A78' as const;
 
 // Network configuration
 export const GNOSIS_RPC_URL = 'https://rpc.gnosischain.com/' as const;
