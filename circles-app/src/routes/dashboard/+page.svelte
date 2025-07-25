@@ -13,6 +13,7 @@
     getSubscriptionsForAddress,
     getSubscribersForAddress,
   } from '$lib/stores/subscriptions';
+  import { SUBSCRIPTION_MODULE } from '$lib/constants/contracts';
   import ModernHistoryChart from '$lib/components/ModernHistoryChart.svelte';
   import ModernPieChart from '$lib/components/ModernPieChart.svelte';
   import GroupMetricsStats from '$lib/components/GroupMetricsStats.svelte';

@@ -8,8 +8,10 @@ import {
 } from '$lib/constants/contracts';
 import { SubscriptionCategory } from '$lib/types/subscriptions';
 import type { Address } from '@circles-sdk/utils';
+import type { ProcessedSubscription } from '$lib/types/subscriptions';
 
 // Updated SubscriptionModule ABI for new contract interface
+//
 const SUBSCRIPTION_MODULE_ABI = [
   {
     type: 'function',
@@ -21,6 +23,13 @@ const SUBSCRIPTION_MODULE_ABI = [
       { name: 'category', type: 'uint8' },
     ],
     outputs: [{ name: 'id', type: 'bytes32' }],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'unsubscribe',
+    inputs: [{ name: 'id', type: 'bytes32' }],
+    outputs: [],
     stateMutability: 'nonpayable',
   },
   {
@@ -167,6 +176,109 @@ export function getCirclesConnection(): {
  */
 function getReadOnlyProvider(): ethers.Provider {
   return new ethers.JsonRpcProvider(GNOSIS_RPC_URL);
+}
+
+/**
+ * Get a user's subscription ids
+ */
+export async function getUserSubscriptionIds(
+  user: Address,
+  moduleAddress: Address
+): Promise<string[]> {
+  try {
+    const provider = getReadOnlyProvider();
+    const contractAddress = moduleAddress || SUBSCRIPTION_MODULE;
+
+    const subscriptionModule = new ethers.Contract(
+      contractAddress,
+      SUBSCRIPTION_MODULE_ABI,
+      provider
+    );
+
+    // This is a view function, not a transaction
+    const ids = await subscriptionModule.getSubscriptionIds(user);
+    console.log('Got subscription ids for user:', user, ids);
+    return ids;
+  } catch (error) {
+    console.error('Failed to get subscription IDs:', error);
+    throw error;
+  }
+}
+
+export async function getUserSubscriptions(
+  user: Address,
+  moduleAddress: Address
+): Promise<ProcessedSubscription[]> {
+  try {
+    // First get all subscription IDs for this user
+    const subscriptionIds = await getUserSubscriptionIds(user, moduleAddress);
+    console.log(
+      'Successfully got subscription ids for user:',
+      user,
+      subscriptionIds
+    );
+    if (!subscriptionIds || subscriptionIds.length === 0) {
+      return [];
+    }
+
+    // Fetch details for each subscription
+    // Fetch details for each subscription
+    const subscriptions = await Promise.all(
+      subscriptionIds.map(async (id, index) => {
+        try {
+          const sub = await getSubscription(id as `0x${string}`, moduleAddress);
+          console.log('Returned subscription: ', sub);
+          return {
+            contract_address:
+              sub.module || moduleAddress || SUBSCRIPTION_MODULE,
+            sub_id: id,
+            module: sub.module || moduleAddress || SUBSCRIPTION_MODULE,
+            subscriber: sub.subscriber,
+            recipient: sub.recipient,
+            amount: sub.amount.toString(),
+            frequency: Number(sub.frequency),
+            category: Number(sub.category) as SubscriptionCategory,
+            tx_hash:
+              '0x0000000000000000000000000000000000000000000000000000000000000000', // Placeholder
+            block_number: 0, // Placeholder
+            block_hash:
+              '0x0000000000000000000000000000000000000000000000000000000000000000',
+            network: 'gnosis',
+            formattedAmount: formatAmount(sub.amount.toString()),
+            formattedFrequency: formatFrequency(Number(sub.frequency)),
+            formattedCategory: formatCategory(Number(sub.category)),
+            // EventRow properties - using index to ensure uniqueness
+            blockNumber: index,
+            transactionIndex: 0,
+            logIndex: 0,
+            transactionHash:
+              '0x0000000000000000000000000000000000000000000000000000000000000000',
+            address: sub.module || moduleAddress || SUBSCRIPTION_MODULE,
+            topics: [],
+            data: '',
+            removed: false,
+          } as ProcessedSubscription;
+        } catch (error) {
+          console.error(`Failed to fetch subscription ${id}:`, error);
+          return null;
+        }
+      })
+    );
+
+    // Filter out any failed fetches
+    return subscriptions.filter(
+      (sub): sub is ProcessedSubscription => sub !== null
+    );
+  } catch (error) {
+    console.error('Failed to get user subscriptions:', error);
+    throw error;
+  }
+}
+
+function formatAmount(amount: string): string {
+  // Convert from wei to CRC (assuming 18 decimals)
+  const num = parseFloat(amount) / 10 ** 18;
+  return num.toFixed(2);
 }
 
 /**
@@ -398,7 +510,7 @@ export async function isModuleApprovedForHub(
 /**
  * Cancel a subscription (unsubscribe)
  */
-export async function cancelSubscription(
+export async function unsubscribe(
   subscriptionId: string,
   moduleAddress?: Address
 ): Promise<`0x${string}`> {

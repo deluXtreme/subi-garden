@@ -4,8 +4,10 @@ import type {
   SubscriptionData,
   ProcessedSubscription,
 } from '$lib/types/subscriptions';
+import { SUBSCRIPTION_MODULE } from '$lib/constants/contracts';
 import { SubscriptionCategory } from '$lib/types/subscriptions';
 import { formatCategory } from '$lib/utils/contractUtils';
+import { getUserSubscriptions } from '$lib/utils/contractUtils';
 
 // Mock CSV data - in production this would come from your database
 const CSV_DATA = `contract_address,sub_id,module,subscriber,recipient,amount,frequency,category,tx_hash,block_number,block_hash,network
@@ -16,6 +18,70 @@ const CSV_DATA = `contract_address,sub_id,module,subscriber,recipient,amount,fre
 0x7e9baf7cc7cd83bacefb9b2d5c5124c0f9c30834,4,0x39c90767e9fe8f10c3a83b003657ebba7068bbab,0xede0c2e70e8e2d54609c1bdf79595506b6f623fe,0xcf6dc192dc292d5f2789da2db02d6dd4f41f4214,1000000000000,3600,0,0x639627a76cbaf2ac8f44ad44ed596bc77ee42f85f85d45b1e0b7e4525870e1d9,40357460,0x846ebb004a7d4993f868a0c7d8c0ec1718143cdf4c146a1bde78a87ab6e9be9c,gnosis`;
 
 let allSubscriptions: ProcessedSubscription[] = [];
+
+// Export a function that creates a store for fetching real subscription data
+export function getSubscriptionsForAddress(address: string) {
+  if (!address) {
+    return readable({
+      data: [],
+      next: async () => false,
+      ended: true,
+    });
+  }
+
+  return readable(
+    {
+      data: [] as ProcessedSubscription[],
+      next: async () => false,
+      ended: false,
+    },
+    (set) => {
+      let cancelled = false;
+
+      // Fetch subscriptions asynchronously
+      (async () => {
+        try {
+          const subscriptions = await getUserSubscriptions(
+            address as `0x${string}`,
+            SUBSCRIPTION_MODULE
+          );
+
+          if (!cancelled) {
+            set({
+              data: subscriptions,
+              next: async () => false,
+              ended: true,
+            });
+          }
+        } catch (error) {
+          console.error('Failed to fetch subscriptions:', error);
+          if (!cancelled) {
+            set({
+              data: [],
+              next: async () => false,
+              ended: true,
+            });
+          }
+        }
+      })();
+
+      // Cleanup function
+      return () => {
+        cancelled = true;
+      };
+    }
+  );
+}
+
+// For subscribers, you'll need a different contract method or approach
+// This is a placeholder that returns empty data for now
+export function getSubscribersForAddress(address: string) {
+  return readable({
+    data: [],
+    next: async () => false,
+    ended: true,
+  });
+}
 
 function formatFrequency(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
@@ -44,61 +110,60 @@ function processSubscription(sub: SubscriptionData): ProcessedSubscription {
 }
 
 // Parse CSV data on module load
-Papa.parse(CSV_DATA, {
-  header: true,
-  skipEmptyLines: true,
-  transform: (value: string, header: string) => {
-    // Convert numeric fields
-    if (['frequency', 'block_number', 'category'].includes(header)) {
-      return parseInt(value, 10);
-    }
-    return value;
-  },
-  complete: (results: any) => {
-    allSubscriptions = results.data.map((sub: SubscriptionData) =>
-      processSubscription(sub)
-    );
-  },
-});
+// Papa.parse(CSV_DATA, {
+//   header: true,
+//   skipEmptyLines: true,
+//   transform: (value: string, header: string) => {
+//     // Convert numeric fields
+//     if (['frequency', 'block_number', 'category'].includes(header)) {
+//       return parseInt(value, 10);
+//     }
+//     return value;
+//   },
+//   complete: (results: any) => {
+//     allSubscriptions = results.data.map((sub: SubscriptionData) =>
+//       processSubscription(sub)
+//     );
+//   },
+// });
 
-export const subscriptionStore = readable(
-  {
-    data: [] as ProcessedSubscription[],
-    next: async () => false,
-    ended: true,
-  },
-  (set) => {
-    // Initialize with empty data
-    set({
-      data: [],
-      next: async () => false,
-      ended: true,
-    });
-  }
-);
+// export const subscriptionStore = readable(
+//   {
+//     data: [] as ProcessedSubscription[],
+//     next: async () => false,
+//     ended: true,
+//   },
+//   (set) => {
+//     // Initialize with empty data
+//     set({
+//       data: [],
+//       next: async () => false,
+//       ended: true,
+//     });
+//   }
+// );
 
-export function getSubscriptionsForAddress(address: string) {
-  const userAddress = address.toLowerCase();
-  const subscriptions = allSubscriptions.filter(
-    (sub) => sub.subscriber.toLowerCase() === userAddress
-  );
+// export function getSubscriptionsForAddress(address: string) {
+//   const userAddress = address.toLowerCase();
+//   const subscriptions = allSubscriptions.filter(
+//     (sub) => sub.subscriber.toLowerCase() === userAddress
+//   );
 
-  return readable({
-    data: subscriptions,
-    next: async () => false,
-    ended: true,
-  });
-}
+//   return readable({
+//     data: subscriptions,
+//     next: async () => false,
+//     ended: true,
+// });
 
-export function getSubscribersForAddress(address: string) {
-  const userAddress = address.toLowerCase();
-  const subscribers = allSubscriptions.filter(
-    (sub) => sub.recipient.toLowerCase() === userAddress
-  );
+// export function getSubscribersForAddress(address: string) {
+//   const userAddress = address.toLowerCase();
+//   const subscribers = allSubscriptions.filter(
+//     (sub) => sub.recipient.toLowerCase() === userAddress
+//   );
 
-  return readable({
-    data: subscribers,
-    next: async () => false,
-    ended: true,
-  });
-}
+//   return readable({
+//     data: subscribers,
+//     next: async () => false,
+//     ended: true,
+//   });
+// }
